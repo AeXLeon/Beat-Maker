@@ -13,53 +13,93 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #0c0c0c, #1a1a1a, #0f0f0f, #141414);
-            background-size: 400% 400%;
-            animation: slowDrift 20s ease infinite;
-            overflow-x: hidden;
+            background: #000;
+            overflow: hidden;
             min-height: 100vh;
             position: relative;
+            cursor: none;
         }
 
-        @keyframes slowDrift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* Manga-style background */
+        .manga-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(20, 20, 20, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(30, 30, 30, 0.6) 0%, transparent 50%),
+                linear-gradient(45deg, #000 0%, #111 50%, #000 100%);
+            animation: bgShift 3s ease-in-out infinite alternate;
+            z-index: 1;
         }
 
-        /* Dark floating particles */
-        .particles {
+        @keyframes bgShift {
+            0% { filter: brightness(1) contrast(1.2); }
+            100% { filter: brightness(0.8) contrast(1.5); }
+        }
+
+        /* Speed lines */
+        .speed-lines {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 1;
+            z-index: 2;
         }
 
-        .particle {
+        .speed-line {
             position: absolute;
-            width: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
             height: 2px;
-            background: rgba(80, 80, 80, 0.3);
-            border-radius: 50%;
-            animation: fadeFloat 12s infinite linear;
+            width: 100%;
+            animation: speedLineMove 0.3s linear infinite;
+            opacity: 0;
         }
 
-        @keyframes fadeFloat {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
+        @keyframes speedLineMove {
+            0% { 
+                transform: translateX(-100%);
                 opacity: 0;
             }
-            20% {
-                opacity: 0.3;
+            10% { 
+                opacity: 1;
             }
-            80% {
-                opacity: 0.1;
+            90% { 
+                opacity: 1;
             }
-            100% {
-                transform: translateY(-100px) rotate(180deg);
+            100% { 
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Vertical speed lines */
+        .vertical-speed-line {
+            position: absolute;
+            background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            width: 2px;
+            height: 100%;
+            animation: verticalSpeedLineMove 0.4s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes verticalSpeedLineMove {
+            0% { 
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            10% { 
+                opacity: 1;
+            }
+            90% { 
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(100%);
                 opacity: 0;
             }
         }
@@ -73,419 +113,607 @@
             min-height: 100vh;
             position: relative;
             z-index: 10;
-            padding: 20px;
         }
 
-        /* Main S letter */
+        /* Main S letter with anime effects */
         .main-s {
-            font-size: 20rem;
-            font-weight: 100;
-            color: #2a2a2a;
+            font-size: 25rem;
+            font-weight: 900;
+            color: #fff;
             text-shadow: 
-                0 0 20px rgba(60, 60, 60, 0.3),
-                0 0 40px rgba(40, 40, 40, 0.2),
-                0 0 80px rgba(30, 30, 30, 0.1);
-            animation: breathe 8s ease-in-out infinite, subtleMove 15s ease-in-out infinite;
+                0 0 20px rgba(255, 255, 255, 0.8),
+                0 0 40px rgba(255, 255, 255, 0.6),
+                0 0 80px rgba(200, 200, 255, 0.4),
+                5px 5px 0px rgba(0, 0, 0, 0.8);
+            animation: animeFloat 2s ease-in-out infinite alternate;
             cursor: pointer;
-            transition: all 2s ease;
+            transition: all 0.1s ease;
             position: relative;
-            filter: blur(0.5px);
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
         }
 
-        .main-s:hover {
-            color: #404040;
-            transform: scale(1.02);
-            filter: blur(0px);
-            transition: all 3s ease;
+        @keyframes animeFloat {
+            0% { 
+                transform: translateY(0px) scale(1);
+                filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
+            }
+            100% { 
+                transform: translateY(-20px) scale(1.02);
+                filter: drop-shadow(0 0 50px rgba(255, 255, 255, 0.5));
+            }
         }
 
-        @keyframes breathe {
-            0%, 100% { 
+        /* Anime-style impact effect */
+        .main-s.impact {
+            animation: animeImpact 0.3s ease-out;
+        }
+
+        @keyframes animeImpact {
+            0% { 
                 transform: scale(1);
-                opacity: 0.7;
+                filter: brightness(1) drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
             }
             50% { 
-                transform: scale(1.01);
-                opacity: 0.9;
+                transform: scale(1.3);
+                filter: brightness(2) drop-shadow(0 0 80px rgba(255, 255, 255, 0.9));
             }
-        }
-
-        @keyframes subtleMove {
-            0%, 100% { 
-                transform: translateY(0px);
-            }
-            33% { 
-                transform: translateY(-10px);
-            }
-            66% { 
-                transform: translateY(5px);
-            }
-        }
-
-        /* Subtle glow around S */
-        .main-s::before {
-            content: '';
-            position: absolute;
-            top: -50px;
-            left: -50px;
-            right: -50px;
-            bottom: -50px;
-            background: radial-gradient(circle, rgba(50, 50, 50, 0.1), transparent 70%);
-            border-radius: 50%;
-            z-index: -1;
-            opacity: 0.5;
-            animation: slowPulse 10s ease infinite;
-        }
-
-        @keyframes slowPulse {
-            0%, 100% { 
+            100% { 
                 transform: scale(1);
-                opacity: 0.3;
-            }
-            50% { 
-                transform: scale(1.1);
-                opacity: 0.1;
+                filter: brightness(1) drop-shadow(0 0 30px rgba(255, 255, 255, 0.3));
             }
         }
 
-        /* Minimal navigation dots */
-        .nav-dots {
+        /* Manga-style action lines */
+        .action-lines {
             position: fixed;
-            right: 40px;
             top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            z-index: 100;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 15;
+            opacity: 0;
         }
 
-        .nav-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(100, 100, 100, 0.2);
-            cursor: pointer;
-            transition: all 1s ease;
+        .action-line {
+            position: absolute;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+            width: 4px;
+            height: 100%;
+            transform-origin: center bottom;
+            animation: actionLineExpand 0.5s ease-out forwards;
         }
 
-        .nav-dot:hover {
-            background: rgba(120, 120, 120, 0.4);
-            transform: scale(1.5);
+        @keyframes actionLineExpand {
+            0% { 
+                height: 0%;
+                opacity: 1;
+            }
+            100% { 
+                height: 150%;
+                opacity: 0;
+            }
         }
 
-        /* Subtle moving lines */
-        .moving-lines {
+        /* Slash effect */
+        .slash-effect {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 2;
+            z-index: 20;
+            opacity: 0;
         }
 
-        .line {
+        .slash {
             position: absolute;
-            background: linear-gradient(90deg, transparent, rgba(70, 70, 70, 0.1), transparent);
-            animation: slowMoveLine 25s linear infinite;
-        }
-
-        .line:nth-child(1) {
-            top: 25%;
-            width: 100%;
-            height: 1px;
-            animation-delay: 0s;
-        }
-
-        .line:nth-child(2) {
-            top: 70%;
-            width: 100%;
-            height: 1px;
-            animation-delay: 8s;
-        }
-
-        .line:nth-child(3) {
-            left: 20%;
-            width: 1px;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+            width: 8px;
             height: 100%;
-            animation: slowMoveLineVertical 30s linear infinite;
-            animation-delay: 15s;
+            transform: rotate(45deg);
+            animation: slashMove 0.2s ease-out forwards;
         }
 
-        @keyframes slowMoveLine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+        @keyframes slashMove {
+            0% { 
+                transform: rotate(45deg) translateX(-100px);
+                opacity: 0;
+            }
+            20% { 
+                opacity: 1;
+            }
+            100% { 
+                transform: rotate(45deg) translateX(100px);
+                opacity: 0;
+            }
         }
 
-        @keyframes slowMoveLineVertical {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-
-        /* Bottom elements */
-        .bottom-elements {
-            position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 40px;
-            opacity: 0.4;
-        }
-
-        .element {
-            width: 40px;
-            height: 40px;
-            border: 1px solid rgba(100, 100, 100, 0.2);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 2s ease;
-            position: relative;
-        }
-
-        .element:hover {
-            border-color: rgba(120, 120, 120, 0.4);
-            transform: scale(1.1);
-            opacity: 0.8;
-        }
-
-        .element::before {
-            content: '';
-            position: absolute;
+        /* Anime-style shockwave */
+        .shockwave {
+            position: fixed;
             top: 50%;
             left: 50%;
             width: 0;
             height: 0;
-            background: rgba(80, 80, 80, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.8);
             border-radius: 50%;
-            transition: all 2s ease;
             transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 12;
+            animation: shockwaveExpand 0.6s ease-out forwards;
         }
 
-        .element:hover::before {
-            width: 80%;
-            height: 80%;
+        @keyframes shockwaveExpand {
+            0% { 
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+            100% { 
+                width: 200vw;
+                height: 200vw;
+                opacity: 0;
+            }
+        }
+
+        /* Manga-style focus lines */
+        .focus-lines {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0;
+        }
+
+        .focus-line {
+            position: absolute;
+            background: linear-gradient(to center, transparent, rgba(255, 255, 255, 0.6), transparent);
+            width: 2px;
+            height: 100%;
+            transform-origin: center center;
+            animation: focusLineExpand 0.8s ease-out forwards;
+        }
+
+        @keyframes focusLineExpand {
+            0% { 
+                height: 0%;
+                opacity: 1;
+            }
+            100% { 
+                height: 200%;
+                opacity: 0;
+            }
+        }
+
+        /* Particle burst */
+        .particle-burst {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 13;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            animation: particleExplode 0.8s ease-out forwards;
+        }
+
+        @keyframes particleExplode {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Navigation with anime style */
+        .nav-elements {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-element {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            position: relative;
+        }
+
+        .nav-element:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-element::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            transition: all 0.1s ease;
+        }
+
+        .nav-element:hover::after {
+            border-color: rgba(255, 255, 255, 0.4);
+            animation: navRipple 0.3s ease-out;
+        }
+
+        @keyframes navRipple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* Custom cursor */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.1s ease;
+            mix-blend-mode: difference;
+        }
+
+        .custom-cursor.clicked {
+            animation: cursorClick 0.2s ease-out;
+        }
+
+        @keyframes cursorClick {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+
+        /* Screen flash */
+        .screen-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0);
+            pointer-events: none;
+            z-index: 1000;
+            transition: all 0.1s ease;
+        }
+
+        .screen-flash.active {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         /* Responsive design */
         @media (max-width: 768px) {
             .main-s {
-                font-size: 12rem;
+                font-size: 15rem;
             }
             
-            .nav-dots {
-                right: 20px;
-            }
-            
-            .bottom-elements {
-                bottom: 40px;
-                gap: 25px;
-            }
-            
-            .element {
-                width: 30px;
-                height: 30px;
-            }
-        }
-
-        /* Subtle cursor */
-        .cursor-trail {
-            position: fixed;
-            width: 15px;
-            height: 15px;
-            border: 1px solid rgba(100, 100, 100, 0.2);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transition: all 0.2s ease;
-            opacity: 0.3;
-        }
-
-        /* Rain effect */
-        .rain {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .drop {
-            position: absolute;
-            width: 1px;
-            height: 20px;
-            background: rgba(60, 60, 60, 0.1);
-            animation: fall 8s linear infinite;
-        }
-
-        @keyframes fall {
-            0% {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.3;
-            }
-            90% {
-                opacity: 0.1;
-            }
-            100% {
-                transform: translateY(100vh);
-                opacity: 0;
+            .nav-elements {
+                right: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Floating particles -->
-    <div class="particles" id="particles"></div>
+    <!-- Manga background -->
+    <div class="manga-bg"></div>
     
-    <!-- Rain effect -->
-    <div class="rain" id="rain"></div>
+    <!-- Speed lines container -->
+    <div class="speed-lines" id="speedLines"></div>
     
-    <!-- Moving lines -->
-    <div class="moving-lines">
-        <div class="line"></div>
-        <div class="line"></div>
-        <div class="line"></div>
-    </div>
+    <!-- Screen flash -->
+    <div class="screen-flash" id="screenFlash"></div>
+    
+    <!-- Slash effect -->
+    <div class="slash-effect" id="slashEffect"></div>
+    
+    <!-- Action lines -->
+    <div class="action-lines" id="actionLines"></div>
+    
+    <!-- Focus lines -->
+    <div class="focus-lines" id="focusLines"></div>
     
     <!-- Main container -->
     <div class="container">
         <div class="main-s" id="mainS">S</div>
     </div>
     
-    <!-- Navigation dots -->
-    <div class="nav-dots">
-        <div class="nav-dot"></div>
-        <div class="nav-dot"></div>
-        <div class="nav-dot"></div>
+    <!-- Navigation -->
+    <div class="nav-elements">
+        <div class="nav-element" data-effect="speed"></div>
+        <div class="nav-element" data-effect="slash"></div>
+        <div class="nav-element" data-effect="focus"></div>
+        <div class="nav-element" data-effect="burst"></div>
     </div>
     
-    <!-- Bottom elements -->
-    <div class="bottom-elements">
-        <div class="element"></div>
-        <div class="element"></div>
-        <div class="element"></div>
-    </div>
-    
-    <!-- Subtle cursor -->
-    <div class="cursor-trail" id="cursorTrail"></div>
+    <!-- Custom cursor -->
+    <div class="custom-cursor" id="customCursor"></div>
 
     <script>
-        // Create floating particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = 30;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 12 + 's';
-                particle.style.animationDuration = (Math.random() * 8 + 8) + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
+        let isAnimating = false;
         
-        // Create rain effect
-        function createRain() {
-            const rainContainer = document.getElementById('rain');
-            const dropCount = 15;
-            
-            for (let i = 0; i < dropCount; i++) {
-                const drop = document.createElement('div');
-                drop.className = 'drop';
-                drop.style.left = Math.random() * 100 + '%';
-                drop.style.animationDelay = Math.random() * 8 + 's';
-                drop.style.animationDuration = (Math.random() * 5 + 6) + 's';
-                rainContainer.appendChild(drop);
-            }
-        }
-        
-        // Subtle cursor trail
-        function initCursorTrail() {
-            const cursorTrail = document.getElementById('cursorTrail');
+        // Custom cursor
+        function initCustomCursor() {
+            const cursor = document.getElementById('customCursor');
             
             document.addEventListener('mousemove', (e) => {
-                cursorTrail.style.left = e.clientX - 7.5 + 'px';
-                cursorTrail.style.top = e.clientY - 7.5 + 'px';
+                cursor.style.left = e.clientX - 10 + 'px';
+                cursor.style.top = e.clientY - 10 + 'px';
             });
-        }
-        
-        // Main S subtle effects
-        function initMainSEffects() {
-            const mainS = document.getElementById('mainS');
             
-            mainS.addEventListener('click', () => {
-                // Subtle ripple effect
-                mainS.style.transform = 'scale(0.98)';
-                mainS.style.opacity = '0.5';
-                
+            document.addEventListener('click', () => {
+                cursor.classList.add('clicked');
                 setTimeout(() => {
-                    mainS.style.transform = '';
-                    mainS.style.opacity = '';
-                }, 300);
-                
-                // Create subtle particles
-                for (let i = 0; i < 8; i++) {
-                    const spark = document.createElement('div');
-                    spark.style.position = 'absolute';
-                    spark.style.width = '2px';
-                    spark.style.height = '2px';
-                    spark.style.background = 'rgba(80, 80, 80, 0.4)';
-                    spark.style.borderRadius = '50%';
-                    spark.style.left = '50%';
-                    spark.style.top = '50%';
-                    spark.style.pointerEvents = 'none';
-                    spark.style.animation = `subtleExplode 2s ease forwards`;
-                    spark.style.animationDelay = Math.random() * 0.5 + 's';
-                    
-                    const angle = (Math.PI * 2 * i) / 8;
-                    const distance = Math.random() * 100 + 50;
-                    
-                    spark.style.setProperty('--x', Math.cos(angle) * distance + 'px');
-                    spark.style.setProperty('--y', Math.sin(angle) * distance + 'px');
-                    
-                    mainS.appendChild(spark);
-                    
-                    setTimeout(() => {
-                        spark.remove();
-                    }, 2000);
-                }
+                    cursor.classList.remove('clicked');
+                }, 200);
             });
         }
         
-        // Interactive elements
-        function initInteractiveElements() {
-            const elements = document.querySelectorAll('.element');
+        // Create speed lines effect
+        function createSpeedLines() {
+            if (isAnimating) return;
+            isAnimating = true;
             
-            elements.forEach((element) => {
+            const speedLinesContainer = document.getElementById('speedLines');
+            speedLinesContainer.innerHTML = '';
+            
+            // Horizontal speed lines
+            for (let i = 0; i < 15; i++) {
+                const line = document.createElement('div');
+                line.className = 'speed-line';
+                line.style.top = Math.random() * 100 + '%';
+                line.style.animationDelay = Math.random() * 0.1 + 's';
+                speedLinesContainer.appendChild(line);
+            }
+            
+            // Vertical speed lines
+            for (let i = 0; i < 8; i++) {
+                const line = document.createElement('div');
+                line.className = 'vertical-speed-line';
+                line.style.left = Math.random() * 100 + '%';
+                line.style.animationDelay = Math.random() * 0.15 + 's';
+                speedLinesContainer.appendChild(line);
+            }
+            
+            setTimeout(() => {
+                speedLinesContainer.innerHTML = '';
+                isAnimating = false;
+            }, 800);
+        }
+        
+        // Create slash effect
+        function createSlashEffect() {
+            const slashContainer = document.getElementById('slashEffect');
+            slashContainer.innerHTML = '';
+            slashContainer.style.opacity = '1';
+            
+            for (let i = 0; i < 5; i++) {
+                const slash = document.createElement('div');
+                slash.className = 'slash';
+                slash.style.left = Math.random() * 100 + '%';
+                slash.style.top = Math.random() * 100 + '%';
+                slash.style.animationDelay = i * 0.05 + 's';
+                slashContainer.appendChild(slash);
+            }
+            
+            // Screen flash
+            const screenFlash = document.getElementById('screenFlash');
+            screenFlash.classList.add('active');
+            setTimeout(() => {
+                screenFlash.classList.remove('active');
+            }, 100);
+            
+            setTimeout(() => {
+                slashContainer.style.opacity = '0';
+            }, 500);
+        }
+        
+        // Create action lines
+        function createActionLines() {
+            const actionLinesContainer = document.getElementById('actionLines');
+            actionLinesContainer.innerHTML = '';
+            actionLinesContainer.style.opacity = '1';
+            
+            for (let i = 0; i < 12; i++) {
+                const line = document.createElement('div');
+                line.className = 'action-line';
+                line.style.transform = `rotate(${i * 30}deg)`;
+                line.style.animationDelay = i * 0.02 + 's';
+                actionLinesContainer.appendChild(line);
+            }
+            
+            setTimeout(() => {
+                actionLinesContainer.style.opacity = '0';
+            }, 500);
+        }
+        
+        // Create focus lines
+        function createFocusLines() {
+            const focusLinesContainer = document.getElementById('focusLines');
+            focusLinesContainer.innerHTML = '';
+            focusLinesContainer.style.opacity = '1';
+            
+            for (let i = 0; i < 20; i++) {
+                const line = document.createElement('div');
+                line.className = 'focus-line';
+                line.style.transform = `rotate(${i * 18}deg)`;
+                line.style.animationDelay = i * 0.01 + 's';
+                focusLinesContainer.appendChild(line);
+            }
+            
+            setTimeout(() => {
+                focusLinesContainer.style.opacity = '0';
+            }, 800);
+        }
+        
+        // Create shockwave
+        function createShockwave() {
+            const shockwave = document.createElement('div');
+            shockwave.className = 'shockwave';
+            document.body.appendChild(shockwave);
+            
+            setTimeout(() => {
+                shockwave.remove();
+            }, 600);
+        }
+        
+        // Create particle burst
+        function createParticleBurst() {
+            const burstContainer = document.createElement('div');
+            burstContainer.className = 'particle-burst';
+            document.body.appendChild(burstContainer);
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const angle = (Math.PI * 2 * i) / 20;
+                const distance = Math.random() * 200 + 100;
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--x', x + 'px');
+                particle.style.setProperty('--y', y + 'px');
+                particle.style.animationDelay = Math.random() * 0.1 + 's';
+                
+                burstContainer.appendChild(particle);
+            }
+            
+            setTimeout(() => {
+                burstContainer.remove();
+            }, 800);
+        }
+        
+        // Main S impact effect
+        function triggerImpact() {
+            const mainS = document.getElementById('mainS');
+            mainS.classList.add('impact');
+            
+            setTimeout(() => {
+                mainS.classList.remove('impact');
+            }, 300);
+        }
+        
+        // Auto effects
+        function startAutoEffects() {
+            setInterval(() => {
+                if (Math.random() > 0.8) {
+                    createSpeedLines();
+                }
+            }, 2000);
+            
+            setInterval(() => {
+                if (Math.random() > 0.9) {
+                    createSlashEffect();
+                }
+            }, 3000);
+            
+            setInterval(() => {
+                if (Math.random() > 0.85) {
+                    createFocusLines();
+                }
+            }, 4000);
+        }
+        
+        // Initialize effects
+        function initEffects() {
+            // Navigation elements
+            const navElements = document.querySelectorAll('.nav-element');
+            navElements.forEach(element => {
                 element.addEventListener('click', () => {
-                    element.style.opacity = '0.1';
-                    element.style.transform = 'scale(0.8)';
+                    const effect = element.getAttribute('data-effect');
                     
-                    setTimeout(() => {
-                        element.style.opacity = '';
-                        element.style.transform = '';
-                    }, 1000);
+                    switch(effect) {
+                        case 'speed':
+                            createSpeedLines();
+                            break;
+                        case 'slash':
+                            createSlashEffect();
+                            triggerImpact();
+                            break;
+                        case 'focus':
+                            createFocusLines();
+                            createShockwave();
+                            break;
+                        case 'burst':
+                            createParticleBurst();
+                            createActionLines();
+                            triggerImpact();
+                            break;
+                    }
                 });
             });
+            
+            // Main S click
+            const mainS = document.getElementById('mainS');
+            mainS.addEventListener('click', () => {
+                const effects = ['speed', 'slash', 'focus', 'burst'];
+                const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+                
+                switch(randomEffect) {
+                    case 'speed':
+                        createSpeedLines();
+                        break;
+                    case 'slash':
+                        createSlashEffect();
+                        triggerImpact();
+                        break;
+                    case 'focus':
+                        createFocusLines();
+                        createShockwave();
+                        break;
+                    case 'burst':
+                        createParticleBurst();
+                        createActionLines();
+                        triggerImpact();
+                        break;
+                }
+            });
         }
         
-        // Add subtle explosion keyframes
+        // Add particle explosion styles
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes subtleExplode {
-                0% {
-                    transform: translate(-50%, -50%) scale(1);
-                    opacity: 0.4;
+            @keyframes particleExplode {
+                0% { 
+                    transform: scale(1) translate(0, 0);
+                    opacity: 1;
                 }
-                100% {
-                    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0);
+                100% { 
+                    transform: scale(0) translate(var(--x), var(--y));
                     opacity: 0;
                 }
             }
@@ -494,20 +722,31 @@
         
         // Initialize everything
         document.addEventListener('DOMContentLoaded', () => {
-            createParticles();
-            createRain();
-            initCursorTrail();
-            initMainSEffects();
-            initInteractiveElements();
+            initCustomCursor();
+            initEffects();
+            startAutoEffects();
         });
         
-        // Subtle parallax on mouse move
-        document.addEventListener('mousemove', (e) => {
-            const mainS = document.getElementById('mainS');
-            const x = (e.clientX / window.innerWidth - 0.5) * 20;
-            const y = (e.clientY / window.innerHeight - 0.5) * 20;
-            
-            mainS.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
+        // Keyboard shortcuts for effects
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case '1':
+                    createSpeedLines();
+                    break;
+                case '2':
+                    createSlashEffect();
+                    triggerImpact();
+                    break;
+                case '3':
+                    createFocusLines();
+                    createShockwave();
+                    break;
+                case '4':
+                    createParticleBurst();
+                    createActionLines();
+                    triggerImpact();
+                    break;
+            }
         });
     </script>
 </body>
