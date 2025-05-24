@@ -797,4 +797,496 @@
                         gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                         filterNode.frequency.setValueAtTime(2000, now);
                         
-                        const noiseGain = this.audioContext
+                        const noiseGain = this.audioContext.createGain();
+                        noiseSource.connect(noiseGain);
+                        noiseGain.connect(gainNode);
+                        noiseGain.gain.setValueAtTime(baseVolume * 0.4, now);
+                        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                        noiseSource.start(now);
+                        noiseSource.stop(now + 0.15);
+                        break;
+                        
+                    case 'hihat':
+                        const hihatNoise = this.createNoiseBuffer(0.08);
+                        const hihatSource = this.audioContext.createBufferSource();
+                        hihatSource.buffer = hihatNoise;
+                        hihatSource.connect(filterNode);
+                        
+                        gainNode.gain.setValueAtTime(baseVolume * 0.3, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                        filterNode.frequency.setValueAtTime(8000, now);
+                        filterNode.Q.value = 2;
+                        
+                        hihatSource.start(now);
+                        hihatSource.stop(now + 0.08);
+                        return hihatSource;
+                        
+                    case 'openhat':
+                        const openhatNoise = this.createNoiseBuffer(0.25);
+                        const openhatSource = this.audioContext.createBufferSource();
+                        openhatSource.buffer = openhatNoise;
+                        openhatSource.connect(filterNode);
+                        
+                        gainNode.gain.setValueAtTime(baseVolume * 0.25, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                        filterNode.frequency.setValueAtTime(6000, now);
+                        filterNode.Q.value = 1.5;
+                        
+                        openhatSource.start(now);
+                        openhatSource.stop(now + 0.25);
+                        return openhatSource;
+                        
+                    case 'crash':
+                        const crashNoise = this.createNoiseBuffer(0.8);
+                        const crashSource = this.audioContext.createBufferSource();
+                        crashSource.buffer = crashNoise;
+                        crashSource.connect(filterNode);
+                        
+                        oscillator.frequency.setValueAtTime(1500, now);
+                        oscillator.type = 'sawtooth';
+                        gainNode.gain.setValueAtTime(baseVolume * 0.4, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                        filterNode.frequency.setValueAtTime(4000, now);
+                        
+                        crashSource.start(now);
+                        crashSource.stop(now + 0.8);
+                        break;
+                        
+                    case 'clap':
+                        // Multi-layered clap sound
+                        for (let i = 0; i < 3; i++) {
+                            const clapNoise = this.createNoiseBuffer(0.02);
+                            const clapSource = this.audioContext.createBufferSource();
+                            clapSource.buffer = clapNoise;
+                            const clapGain = this.audioContext.createGain();
+                            
+                            clapSource.connect(clapGain);
+                            clapGain.connect(filterNode);
+                            clapGain.gain.setValueAtTime(baseVolume * 0.3, now + i * 0.01);
+                            clapGain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.01 + 0.02);
+                            
+                            clapSource.start(now + i * 0.01);
+                            clapSource.stop(now + i * 0.01 + 0.02);
+                        }
+                        
+                        filterNode.frequency.setValueAtTime(2000, now);
+                        return null;
+                        
+                    case 'ride':
+                        const rideNoise = this.createNoiseBuffer(0.3);
+                        const rideSource = this.audioContext.createBufferSource();
+                        rideSource.buffer = rideNoise;
+                        
+                        oscillator.frequency.setValueAtTime(3000, now);
+                        oscillator.type = 'triangle';
+                        gainNode.gain.setValueAtTime(baseVolume * 0.2, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                        filterNode.frequency.setValueAtTime(5000, now);
+                        
+                        rideSource.connect(filterNode);
+                        rideSource.start(now);
+                        rideSource.stop(now + 0.3);
+                        break;
+                        
+                    case 'perc':
+                        oscillator.frequency.setValueAtTime(800, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+                        oscillator.type = 'square';
+                        gainNode.gain.setValueAtTime(baseVolume * 0.4, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                        filterNode.frequency.setValueAtTime(1500, now);
+                        break;
+                }
+                
+                oscillator.start(now);
+                oscillator.stop(now + (type === 'crash' ? 0.8 : type === 'openhat' ? 0.25 : type === 'ride' ? 0.3 : 0.4));
+                
+                return oscillator;
+            }
+
+            createNoiseBuffer(duration) {
+                const length = this.audioContext.sampleRate * duration;
+                const buffer = this.audioContext.createBuffer(1, length, this.audioContext.sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                for (let i = 0; i < length; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                
+                return buffer;
+            }
+
+            init() {
+                this.createPlaybackIndicator();
+                this.createTracks();
+                this.setupEventListeners();
+            }
+
+            createPlaybackIndicator() {
+                const indicator = document.getElementById('playbackIndicator');
+                indicator.innerHTML = '';
+                
+                for (let i = 0; i < this.patternLength; i++) {
+                    const step = document.createElement('div');
+                    step.className = 'step-indicator';
+                    step.dataset.step = i;
+                    indicator.appendChild(step);
+                }
+            }
+
+            createTracks() {
+                const container = document.getElementById('trackContainer');
+                container.innerHTML = '';
+                
+                this.tracks.forEach((track, trackIndex) => {
+                    const trackRow = document.createElement('div');
+                    trackRow.className = 'track-row';
+                    
+                    const trackInfo = document.createElement('div');
+                    trackInfo.className = 'track-info';
+                    
+                    const trackName = document.createElement('div');
+                    trackName.className = 'track-name';
+                    trackName.textContent = track.name;
+                    
+                    const trackControls = document.createElement('div');
+                    trackControls.className = 'track-controls';
+                    
+                    const muteBtn = document.createElement('button');
+                    muteBtn.className = 'mute-btn';
+                    muteBtn.textContent = 'M';
+                    muteBtn.onclick = () => this.toggleMute(trackIndex);
+                    
+                    const soloBtn = document.createElement('button');
+                    soloBtn.className = 'solo-btn';
+                    soloBtn.textContent = 'S';
+                    soloBtn.onclick = () => this.toggleSolo(trackIndex);
+                    
+                    const volumeSlider = document.createElement('input');
+                    volumeSlider.type = 'range';
+                    volumeSlider.className = 'slider track-volume';
+                    volumeSlider.min = '0';
+                    volumeSlider.max = '100';
+                    volumeSlider.value = '100';
+                    volumeSlider.onchange = (e) => this.updateTrackVolume(trackIndex, e.target.value / 100);
+                    
+                    trackControls.appendChild(muteBtn);
+                    trackControls.appendChild(soloBtn);
+                    trackControls.appendChild(volumeSlider);
+                    
+                    trackInfo.appendChild(trackName);
+                    trackInfo.appendChild(trackControls);
+                    
+                    const patternGrid = document.createElement('div');
+                    patternGrid.className = 'pattern-grid';
+                    
+                    for (let i = 0; i < this.patternLength; i++) {
+                        const step = document.createElement('div');
+                        step.className = 'pattern-step';
+                        step.dataset.track = trackIndex;
+                        step.dataset.step = i;
+                        
+                        const velocityBar = document.createElement('div');
+                        velocityBar.className = 'velocity-bar';
+                        velocityBar.style.transform = `scaleY(${track.velocity[i]})`;
+                        step.appendChild(velocityBar);
+                        
+                        step.addEventListener('click', (e) => {
+                            if (e.shiftKey) {
+                                this.adjustVelocity(trackIndex, i);
+                            } else {
+                                this.toggleStep(trackIndex, i);
+                            }
+                        });
+                        
+                        step.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            this.adjustVelocity(trackIndex, i);
+                        });
+                        
+                        patternGrid.appendChild(step);
+                    }
+                    
+                    trackRow.appendChild(trackInfo);
+                    trackRow.appendChild(patternGrid);
+                    container.appendChild(trackRow);
+                });
+            }
+
+            toggleStep(trackIndex, stepIndex) {
+                this.tracks[trackIndex].pattern[stepIndex] = !this.tracks[trackIndex].pattern[stepIndex];
+                const stepElement = document.querySelector(`[data-track="${trackIndex}"][data-step="${stepIndex}"]`);
+                stepElement.classList.toggle('active', this.tracks[trackIndex].pattern[stepIndex]);
+                
+                if (this.tracks[trackIndex].pattern[stepIndex]) {
+                    this.playSound(this.tracks[trackIndex].sound, this.tracks[trackIndex].velocity[stepIndex]);
+                }
+            }
+
+            adjustVelocity(trackIndex, stepIndex) {
+                const currentVelocity = this.tracks[trackIndex].velocity[stepIndex];
+                const newVelocity = currentVelocity >= 1 ? 0.2 : currentVelocity + 0.2;
+                this.tracks[trackIndex].velocity[stepIndex] = Math.min(newVelocity, 1);
+                
+                const stepElement = document.querySelector(`[data-track="${trackIndex}"][data-step="${stepIndex}"]`);
+                const velocityBar = stepElement.querySelector('.velocity-bar');
+                velocityBar.style.transform = `scaleY(${this.tracks[trackIndex].velocity[stepIndex]})`;
+            }
+
+            toggleMute(trackIndex) {
+                this.tracks[trackIndex].muted = !this.tracks[trackIndex].muted;
+                const muteBtn = document.querySelectorAll('.mute-btn')[trackIndex];
+                muteBtn.classList.toggle('active', this.tracks[trackIndex].muted);
+            }
+
+            toggleSolo(trackIndex) {
+                this.tracks[trackIndex].soloed = !this.tracks[trackIndex].soloed;
+                const soloBtn = document.querySelectorAll('.solo-btn')[trackIndex];
+                soloBtn.classList.toggle('active', this.tracks[trackIndex].soloed);
+            }
+
+            updateTrackVolume(trackIndex, volume) {
+                this.tracks[trackIndex].volume = volume;
+            }
+
+            playSound(soundType, velocity = 0.8) {
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                this.createSound(soundType, velocity);
+            }
+
+            togglePlayback() {
+                if (this.isPlaying) {
+                    this.stopPlayback();
+                } else {
+                    this.startPlayback();
+                }
+            }
+
+            startPlayback() {
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                this.isPlaying = true;
+                document.querySelector('.play-btn').textContent = '⏸ Pause';
+                
+                const stepTime = 60000 / (this.tempo * 4);
+                const swingRatio = 1 + (this.swing / 100) * 0.5;
+                
+                let nextStepTime = 0;
+                
+                const scheduleNextStep = () => {
+                    if (!this.isPlaying) return;
+                    
+                    const currentTime = performance.now();
+                    
+                    if (currentTime >= nextStepTime) {
+                        this.playStep();
+                        this.currentStep = (this.currentStep + 1) % this.patternLength;
+                        
+                        const isOffBeat = this.currentStep % 2 === 1;
+                        const adjustedStepTime = isOffBeat ? stepTime * swingRatio : stepTime;
+                        nextStepTime = currentTime + adjustedStepTime;
+                    }
+                    
+                    requestAnimationFrame(scheduleNextStep);
+                };
+                
+                nextStepTime = performance.now();
+                scheduleNextStep();
+            }
+
+            stopPlayback() {
+                this.isPlaying = false;
+                document.querySelector('.play-btn').textContent = '▶ Play';
+                
+                this.currentStep = 0;
+                this.updatePlaybackIndicator();
+                this.clearPlayingSteps();
+            }
+
+            playStep() {
+                const hasSolo = this.tracks.some(track => track.soloed);
+                
+                this.tracks.forEach((track, trackIndex) => {
+                    if (track.pattern[this.currentStep] && !track.muted) {
+                        if (!hasSolo || track.soloed) {
+                            const velocity = track.velocity[this.currentStep] * track.volume;
+                            this.playSound(track.sound, velocity);
+                            
+                            const stepElement = document.querySelector(`[data-track="${trackIndex}"][data-step="${this.currentStep}"]`);
+                            if (stepElement) {
+                                stepElement.classList.add('playing');
+                                setTimeout(() => {
+                                    stepElement.classList.remove('playing');
+                                }, 150);
+                            }
+                        }
+                    }
+                });
+                
+                this.updatePlaybackIndicator();
+                
+                if (this.isRecording) {
+                    this.recordStep();
+                }
+            }
+
+            updatePlaybackIndicator() {
+                const indicators = document.querySelectorAll('.step-indicator');
+                indicators.forEach((indicator, index) => {
+                    indicator.classList.toggle('active', index === this.currentStep);
+                });
+            }
+
+            clearPlayingSteps() {
+                document.querySelectorAll('.pattern-step').forEach(step => {
+                    step.classList.remove('playing');
+                });
+            }
+
+            toggleRecord() {
+                this.isRecording = !this.isRecording;
+                const recordBtn = document.querySelector('.record-btn');
+                const recordIndicator = document.getElementById('recordingIndicator');
+                
+                if (this.isRecording) {
+                    recordBtn.textContent = '⏹ Stop Rec';
+                    recordBtn.style.background = 'linear-gradient(135deg, #ff1744, #d50000)';
+                    recordIndicator.style.display = 'block';
+                } else {
+                    recordBtn.textContent = '⏺ Record';
+                    recordBtn.style.background = 'linear-gradient(135deg, #ff5722, #e64a19)';
+                    recordIndicator.style.display = 'none';
+                }
+            }
+
+            recordStep() {
+                // Recording functionality - could save patterns, export audio, etc.
+                console.log(`Recording step ${this.currentStep}`);
+            }
+
+            setPatternLength(length) {
+                this.patternLength = length;
+                
+                document.querySelectorAll('.length-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+                
+                this.createPlaybackIndicator();
+                this.createTracks();
+                
+                if (this.currentStep >= this.patternLength) {
+                    this.currentStep = 0;
+                }
+            }
+
+            updateTempo() {
+                this.tempo = parseInt(document.getElementById('tempo').value);
+                if (this.isPlaying) {
+                    this.stopPlayback();
+                    this.startPlayback();
+                }
+            }
+
+            updateMasterVolume() {
+                this.masterVolume = document.getElementById('masterVolume').value / 100;
+                this.masterGain.gain.value = this.masterVolume;
+            }
+
+            clearAll() {
+                this.tracks.forEach(track => {
+                    track.pattern.fill(false);
+                    track.velocity.fill(0.8);
+                });
+                
+                document.querySelectorAll('.pattern-step').forEach(step => {
+                    step.classList.remove('active');
+                    const velocityBar = step.querySelector('.velocity-bar');
+                    if (velocityBar) {
+                        velocityBar.style.transform = 'scaleY(0.8)';
+                    }
+                });
+            }
+
+            setupEventListeners() {
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        this.togglePlayback();
+                    } else if (e.code === 'Escape') {
+                        this.stopPlayback();
+                    } else if (e.code === 'KeyR' && e.ctrlKey) {
+                        e.preventDefault();
+                        this.toggleRecord();
+                    } else if (e.code === 'Delete') {
+                        this.clearAll();
+                    }
+                });
+
+                // Effect controls
+                document.getElementById('reverb').onchange = (e) => {
+                    this.reverb.gain.gain.value = e.target.value / 500;
+                };
+
+                document.getElementById('delay').onchange = (e) => {
+                    this.delay.gain.gain.value = e.target.value / 100;
+                };
+
+                document.getElementById('filter').onchange = (e) => {
+                    const freq = 500 + (e.target.value / 100) * 15000;
+                    this.filter.frequency.value = freq;
+                };
+
+                document.getElementById('swing').onchange = (e) => {
+                    this.swing = e.target.value;
+                };
+            }
+        }
+
+        // Global functions for HTML onclick events
+        let studio;
+
+        function togglePlayback() {
+            studio.togglePlayback();
+        }
+
+        function stopPlayback() {
+            studio.stopPlayback();
+        }
+
+        function toggleRecord() {
+            studio.toggleRecord();
+        }
+
+        function clearAll() {
+            studio.clearAll();
+        }
+
+        function updateTempo() {
+            studio.updateTempo();
+        }
+
+        function updateMasterVolume() {
+            studio.updateMasterVolume();
+        }
+
+        function setPatternLength(length) {
+            studio.setPatternLength(length);
+        }
+
+        function playSound(soundType) {
+            studio.playSound(soundType);
+        }
+
+        // Initialize the studio
+        document.addEventListener('DOMContentLoaded', () => {
+            studio = new ProBeatStudio();
+        });
+    </script>
+</body>
+</html>
