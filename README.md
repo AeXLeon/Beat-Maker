@@ -1,7 +1,7 @@
 # Beat Maker
 *v0.2*
 ---
-https://aexleon.github.io/maybee/
+https://aexleon.github.io/Beat-Maker/
 ------
 
 - Record Feature is currently not working.
